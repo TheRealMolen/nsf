@@ -43,9 +43,10 @@
 
     var initEditors = function() {
 
-        d3.select("#addmisfit")
+        d3.select("#addmisfit .mfname")
             .on("keyup", function() {
                 if( d3.event.keyCode === 13 ) {
+                    console.log( this );
                     addMisfit( this.value );
                     this.value = "";
                 }
@@ -71,6 +72,9 @@
 
     var showQuickLink = function( misfit ) {
         hideAllEditors();
+        $("#editlinks #instruction").html(
+            "How does <span class='misfitname'>"+misfit+"</span> link to <span class='misfitname'>" + "OTHER THING" + "</span>?"
+            );
         $("#editlinks").show();
     };
 
@@ -81,7 +85,7 @@
 
         refresh();
 
-        showQuickLink();
+        showQuickLink( name );
     };
 
 
