@@ -1,0 +1,73 @@
+body {
+    background-color: #ddd;
+    font-family: "Didot", serif;
+    font-size: small;
+    color: white;
+    background-color: black;
+}
+
+h1, h2, h3, h4 {
+    font-weight: normal;
+}
+
+pre {
+    font-family: Monaco, "Lucida Console", GillSans, monospace;
+    font-size: x-small;
+    padding: 0.7em;
+}
+
+/* stop iOS fancifying inputs... */
+input[type="text"] {
+    -webkit-appearance: none;
+    border-radius: 0px;
+}
+
+
+#misfited {
+    border-left: solid 1px white;
+    padding-left: 15px;
+}
+
+#quickassociate .inner {
+    margin: 20px;
+}
+
+
+#instruction {
+    font-style: italic;
+    width: 500px;
+    display: inline-block;
+    height: 54px;
+    vertical-align: middle;
+    text-align: right;
+    margin-right: 10px;
+}
+
+.misfitname {
+    text-transform: uppercase;
+    font-style: normal;
+}
+
+#options {
+    display: inline-block;
+    vertical-align: middle;
+    height: 54px;
+}
+
+.option {
+    color: #888;
+}
+
+.selected {
+    color: #fff;
+}
+
+.nav {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 60px;
+}
+
+
+
+
