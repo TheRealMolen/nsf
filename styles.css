@@ -17,9 +17,14 @@ pre {
 }
 
 /* stop iOS fancifying inputs... */
-input[type="text"] {
+input {
     -webkit-appearance: none;
     border-radius: 0px;
+    background-color: #000;
+    color: white;
+    font-family: Didot;
+    font-style: italic;
+    padding: 2px;
 }
 
 
@@ -28,8 +33,17 @@ input[type="text"] {
     padding-left: 15px;
 }
 
-#quickassociate .inner {
-    margin: 20px;
+
+.link {
+    stroke: #888;
+    stroke-width: 3px;
+}
+
+.positive {
+    stroke: #6DB3B3;
+}
+.negative {
+    stroke: #C23432;
 }
 
 
