@@ -16,7 +16,6 @@ pre {
     padding: 0.7em;
 }
 
-/* stop iOS fancifying inputs... */
 input {
     -webkit-appearance: none;
     border-radius: 0px;
@@ -25,6 +24,7 @@ input {
     font-family: Didot;
     font-style: italic;
     padding: 2px;
+    font-size: medium;
 }
 
 
@@ -33,6 +33,15 @@ input {
     padding-left: 15px;
 }
 
+
+.misfit {
+    fill: #FE804C;
+}
+
+.misfit.current {
+    stroke: #FDEDE6;
+    stroke-width: 2px;
+}
 
 .link {
     stroke: #888;

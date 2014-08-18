@@ -18,6 +18,7 @@
             d.x += d3.event.dx;
             d.y += d3.event.dy;
             refreshVis();
+            setDirty();
             } );
 
 
@@ -29,12 +30,17 @@
             .classed( "misfit", 1 )
             .attr( "r", 16 )
             .attr( "fill", "#FE804C" )
-            .call( draggable );
+            .call( draggable )
+            .on( "click", function(d) {
+                currentMisfit = indexOfMisfitId( d.id );
+                showQuickLink();
+            } );
 
         misfitEls
             .attr("cx", function(d) { return d.x; } )
             .attr("cy", function(d) { return d.y; } )
-            .attr( "alt", function(d) { return d.name; } );
+            .attr( "alt", function(d) { return d.name; } )
+            .classed( "current", function(d,i) { return i===currentMisfit; } );
 
         misfitEls.exit().remove();
 
@@ -46,10 +52,10 @@
             .classed( "link", 1 );
 
         linkEls
-            .attr("x1", function(d) { return getMisfit( d.a ).x; } )
-            .attr("y1", function(d) { return getMisfit( d.a ).y; } )
-            .attr("x2", function(d) { return getMisfit( d.b ).x; } )
-            .attr("y2", function(d) { return getMisfit( d.b ).y; } )
+            .attr("x1", function(d) { return getMisfitById( d.a ).x; } )
+            .attr("y1", function(d) { return getMisfitById( d.a ).y; } )
+            .attr("x2", function(d) { return getMisfitById( d.b ).x; } )
+            .attr("y2", function(d) { return getMisfitById( d.b ).y; } )
             .classed( "positive", function(d) { return d.strength > 0; } )
             .classed( "negative", function(d) { return d.strength < 0; } );
 
@@ -100,13 +106,14 @@
     var hideAllEditors = function() {
         $("#inspector .editor").hide();
         currentEditor = "";
+        refreshVis();
     };
 
 
     // ---------- add misfit editor -------------
     var showAddMisfit = function() {
-        hideAllEditors();
         currentMisfit = -1;
+        hideAllEditors();
         $("#addmisfit").show();
         currentEditor = "addmisfit";
         $("#addmisfit .mfname").focus();
@@ -162,6 +169,9 @@
             "How does <span class='misfitname'>" + misfit.name + "</span> link to <span class='misfitname'>" + linkable.name + "</span>?"
             );
 
+        var link = findLink( misfit.id, linkable.id );
+        currentLinkStrength = (link !== null) ? link.strength : 0;
+
         var strengths = d3.select( "#editlinks #options").selectAll(".option")
                 .data( linkStrengths );
         strengths.enter().append( "div" )
@@ -176,10 +186,7 @@
         // keycodes:: left=37, right=39, up=38, down=40, enter=13
         var keycode = d3.event.keyCode;
 
-        if( keycode === 13 ) {  // enter: finish this misfit
-            showAddMisfit();
-        }
-        else if( keycode === 39 ) { // right: move to next misfit
+        if( keycode == 13 || keycode === 39 ) { // enter / right: move to next misfit
             moveToNextLinkable( 1 );
         }
         else if( keycode === 37 ) { // left: move to prev misfit
@@ -210,7 +217,7 @@
 
         var misfit = misfits[currentMisfit];
         var linked = misfits[currentLinkable];
-        addLink( misfit.name, linked.name, currentLinkStrength );
+        addLink( misfit.id, linked.id, currentLinkStrength );
 
         refreshLinkEditor();
         refreshVis();
@@ -220,11 +227,15 @@
     // ------------ misfit management -----------
     var misfits = [];
     var links = [];
-    var i = 1;
+    var nextLinkId = 1;
 
     var addMisfit = function( name ) {
-        misfits.push( {name:name, x:60 * i, y:50} );
-        i += 1;
+        var x = 50 + Math.random() * (width-100);
+        var y = 50 + Math.random() * (height-100);
+        misfits.push( {id:nextLinkId, name:name, x:x, y:y} );
+        nextLinkId += 1;
+
+        saveState();
 
         refreshVis();
 
@@ -232,11 +243,19 @@
         showQuickLink();
     };
 
-    var getMisfit = function( name ) {
-        var matching = misfits.filter( function(misfit) { return misfit.name === name; } );
+    var getMisfitById = function( id ) {
+        var matching = misfits.filter( function(misfit) { return misfit.id === id; } );
         if( matching.length > 0 )
             return matching[0];
         return null;
+    };
+
+    var indexOfMisfitId = function( id ) {
+        for( var i=0; i<misfits.length; i++ ) {
+            if( misfits[i].id === id )
+                return i;
+        }
+        return -1;
     };
     
     var addLink = function( a, b, strength ) {
@@ -245,6 +264,8 @@
         if( strength ) {
             links.push( { a:a, b:b, strength:strength } );
         }
+
+        setDirty();
     };
 
     var linkMatches= function( link, a, b ) {
@@ -268,6 +289,43 @@
     };
 
 
+    // ----------- load/save ----------------
+    var dirtySaveTimer = null;
+    var setDirty = function() {
+       if( dirtySaveTimer ) {
+          clearTimeout( dirtySaveTimer );
+       }
+
+      dirtySaveTimer = setTimeout( saveState, 1000 );
+    };
+
+    var saveState = function() {
+        localStorage.nsfProgram = JSON.stringify( {
+            misfits: misfits,
+            links: links,
+            nextLinkId: nextLinkId
+        } );
+
+        if( dirtySaveTimer ) {
+            clearTimeout( dirtySaveTimer );
+            dirtySaveTimer = null;
+        }
+    };
+
+    var loadState = function() {
+        if( typeof( localStorage.nsfProgram ) !== 'undefined' ) {
+            var state = JSON.parse( localStorage.nsfProgram );
+            misfits = state.misfits;
+            links = state.links;
+            nextLinkId = state.nextLinkId;
+        }
+    };
+
+
+    // ------------- INIT -------------------
+
+    // load old state
+    loadState();
 
     // initial draw
     initEditors();
